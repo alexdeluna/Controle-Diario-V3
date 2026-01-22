@@ -1,15 +1,14 @@
-const CACHE_NAME = 'controle-diario-v3';
-const BASE_PATH = '/Controle-Diario-V3/';
+const CACHE_NAME = 'controle-diario-v3-2';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll([
-        BASE_PATH,
-        BASE_PATH + 'index.html',
-        BASE_PATH + 'app.js',
-        BASE_PATH + 'manifest.json'
+        './',
+        './index.html',
+        './app.js',
+        './manifest.json'
       ]);
     })
   );
