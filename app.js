@@ -17,6 +17,39 @@ function irPara(tela) {
   $(tela).classList.add('ativa');
 }
 
+//===============================
+// FORMATAR HORA
+//===============================
+function formatarHora(valor) {
+  valor = valor.replace(/\D/g, '');
+
+  if (valor.length === 1) valor = '0' + valor;
+  if (valor.length === 2) return valor + ':00';
+  if (valor.length === 3) return '0' + valor[0] + ':' + valor.slice(1);
+  if (valor.length >= 4)
+    return valor.slice(0, 2) + ':' + valor.slice(2, 4);
+
+  return '';
+}
+
+function ativarMascaraHora(id) {
+  const input = document.getElementById(id);
+
+  input.addEventListener('blur', () => {
+    input.value = formatarHora(input.value);
+  });
+}
+
+function capturarHora(id) {
+  const agora = new Date();
+  const h = agora.getHours().toString().padStart(2, '0');
+  const m = agora.getMinutes().toString().padStart(2, '0');
+  document.getElementById(id).value = `${h}:${m}`;
+}
+
+
+
+
 // ===============================
 // INICIAR TURNO
 // ===============================
@@ -143,3 +176,10 @@ function salvarTurno() {
   alert('Turno salvo com sucesso!');
   location.reload();
 }
+
+window.onload = () => {
+  ativarMascaraHora('horaInicial');
+  ativarMascaraHora('horaFinal');
+};
+
+
