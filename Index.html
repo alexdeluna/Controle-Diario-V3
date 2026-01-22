@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Controle Diário V3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .app {
+      width: 360px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    .linha {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 130px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .readonly {
+      background: #eee;
+    }
+
+    .tela {
+      display: none;
+    }
+
+    .tela.ativa {
+      display: block;
+    }
+
+    .menu button {
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 10px;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    #listaHistorico {
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+
+    .dia {
+      border-bottom: 1px solid #ccc;
+      padding: 6px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- MENU -->
+  <section id="menu" class="tela ativa menu">
+    <h2>Menu</h2>
+    <button onclick="irPara('inicioTurno')">▶ Iniciar Turno</button>
+    <button onclick="irPara('custos')">⛽ Custos</button>
+    <button onclick="irPara('fimTurno')">⏹ Fim de Turno</button>
+    <button onclick="irPara('resumoTurno')">📊 Resumo do Turno</button>
+    <button onclick="irPara('resumoDia')">📅 Resumo do Dia</button>
+    <button onclick="irPara('historico')">📜 Histórico</button>
+  </section>
+
+  <!-- INÍCIO DE TURNO -->
+  <section id="inicioTurno" class="tela">
+    <h2>Início de Turno</h2>
+
+    <div class="linha">
+      <label>KM Inicial</label>
+      <input id="kmInicial" type="number">
+    </div>
+
+    <div class="linha">
+      <label>Hora Inicial</label>
+      <input id="horaInicio" type="text" placeholder="HH:MM">
+      <button>⏱</button>
+    </div>
+
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+      <button onclick="irPara('custos')">Avançar ➡</button>
+    </div>
+  </section>
+
+  <!-- CUSTOS -->
+  <section id="custos" class="tela">
+    <h2>Custos</h2>
+
+    <div class="linha">
+      <label>Abastecimento</label>
+      <input type="number">
+      <button>+</button>
+    </div>
+
+    <div class="linha">
+      <label>Total Abastecido</label>
+      <input class="readonly" readonly>
+    </div>
+
+    <div class="linha">
+      <label>Outros Custos</label>
+      <input type="number">
+      <button>+</button>
+    </div>
+
+    <div class="linha">
+      <label>Total Custos</label>
+      <input class="readonly" readonly>
+    </div>
+
+    <div class="linha">
+      <label>Apurado</label>
+      <input type="number">
+    </div>
+
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+      <button onclick="irPara('fimTurno')">Avançar ➡</button>
+    </div>
+  </section>
+
+  <!-- FIM DE TURNO -->
+  <section id="fimTurno" class="tela">
+    <h2>Fim de Turno</h2>
+
+    <div class="linha">
+      <label>KM Final</label>
+      <input id="kmFinal" type="number">
+    </div>
+
+    <div class="linha">
+      <label>Hora Final</label>
+      <input id="horaFim" type="text" placeholder="HH:MM">
+      <button>⏱</button>
+    </div>
+
+    <div class="nav">
+      <button onclick="irPara('custos')">⬅ Custos</button>
+      <button onclick="irPara('resumoTurno')">Avançar ➡</button>
+    </div>
+  </section>
+
+  <!-- RESUMO DO TURNO -->
+  <section id="resumoTurno" class="tela">
+    <h2>Resumo do Turno</h2>
+
+    <div class="linha">
+      <label>KM Percorrido</label>
+      <input class="readonly" readonly>
+    </div>
+
+    <div class="linha">
+      <label>Horas Trabalhadas</label>
+      <input class="readonly" readonly>
+    </div>
+
+    <div class="linha">
+      <label>Valor Hora</label>
+      <input class="readonly" readonly>
+    </div>
+
+    <div class="linha">
+      <strong>Lucro</strong>
+      <input class="readonly" readonly>
+    </div>
+
+    <button style="width:100%;margin-top:10px">💾 Salvar Turno</button>
+
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+  <!-- RESUMO DO DIA -->
+  <section id="resumoDia" class="tela">
+    <h2>Resumo do Dia</h2>
+    <div id="resumoDiaConteudo">(em desenvolvimento)</div>
+
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section id="historico" class="tela">
+    <h2>Histórico</h2>
+    <div id="listaHistorico"></div>
+
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  function irPara(id) {
+    document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+    document.getElementById(id).classList.add('ativa');
+  }
+</script>
+
+</body>
+</html>
