@@ -10,6 +10,15 @@ function hojeISO() {
   return new Date().toISOString().split('T')[0];
 }
 
+function formatarHora(valor) {
+  if (!valor) return '';
+  let v = valor.replace(/\D/g, '');
+  if (v.length >= 3) {
+    v = v.slice(0, 2) + ':' + v.slice(2, 4);
+  }
+  return v.slice(0, 5);
+}
+
 function capturarHoraInput(id) {
   const agora = new Date();
   const h = agora.getHours().toString().padStart(2, '0');
@@ -17,21 +26,14 @@ function capturarHoraInput(id) {
   document.getElementById(id).value = `${h}:${m}`;
 }
 
-/* ========= NAVEGAÇÃO ========= */
-
-function mostrarTela(id) {
-  document.querySelectorAll('.tela').forEach(t => t.style.display = 'none');
-  document.getElementById(id).style.display = 'block';
-}
-
-/* ========= INICIAR TURNO ========= */
+/* ========= INÍCIO DE TURNO ========= */
 
 function iniciarTurno() {
-  const km = Number(document.getElementById('kmInicio').value);
+  const km = Number(document.getElementById('kmInicial').value);
   const hora = document.getElementById('horaInicio').value;
 
   if (!km || !hora) {
-    alert('Preencha KM e Hora de início');
+    alert('Preencha KM inicial e Hora inicial');
     return;
   }
 
@@ -44,35 +46,41 @@ function iniciarTurno() {
   };
 
   salvarRascunho();
-  mostrarTela('telaCustos');
+  irPara('custos');
 }
 
 /* ========= CUSTOS ========= */
 
 function addAbastecimento() {
-  const v = Number(document.getElementById('abastecimento').value);
+  const input = document.getElementById('abastecimento');
+  const total = document.getElementById('totalAbastecido');
+  const v = Number(input.value);
+
   if (!v || v <= 0) return;
+
   turnoAtivo.custos.abastecimento += v;
-  document.getElementById('totalAbastecido').value =
-    turnoAtivo.custos.abastecimento.toFixed(2);
-  document.getElementById('abastecimento').value = '';
+  total.value = turnoAtivo.custos.abastecimento.toFixed(2);
+  input.value = '';
   salvarRascunho();
 }
 
 function addOutroCusto() {
-  const v = Number(document.getElementById('outroCusto').value);
+  const input = document.getElementById('outroCusto');
+  const total = document.getElementById('totalCustos');
+  const v = Number(input.value);
+
   if (!v || v <= 0) return;
+
   turnoAtivo.custos.outros += v;
-  document.getElementById('totalCustos').value =
-    turnoAtivo.custos.outros.toFixed(2);
-  document.getElementById('outroCusto').value = '';
+  total.value = turnoAtivo.custos.outros.toFixed(2);
+  input.value = '';
   salvarRascunho();
 }
 
 /* ========= FIM DE TURNO ========= */
 
 function finalizarTurno() {
-  const km = Number(document.getElementById('kmFim').value);
+  const km = Number(document.getElementById('kmFinal').value);
   const hora = document.getElementById('horaFim').value;
   const apurado = Number(document.getElementById('apurado').value);
 
@@ -85,14 +93,13 @@ function finalizarTurno() {
   turnoAtivo.apurado = apurado;
 
   calcularResumoTurno();
-  mostrarTela('telaResumoTurno');
+  irPara('resumoTurno');
 }
 
 /* ========= CÁLCULOS ========= */
 
 function calcularResumoTurno() {
-  const kmPercorrido =
-    turnoAtivo.fim.km - turnoAtivo.inicio.km;
+  const kmPercorrido = turnoAtivo.fim.km - turnoAtivo.inicio.km;
 
   const data = turnoAtivo.data;
   const ini = new Date(`${data}T${turnoAtivo.inicio.hora}`);
@@ -102,7 +109,7 @@ function calcularResumoTurno() {
   const minutos = Math.round((fim - ini) / 60000);
   const horasDec = minutos / 60;
 
-  let horasTexto =
+  const horasTexto =
     minutos < 60
       ? `${minutos} min`
       : `${Math.floor(minutos / 60)}h ${minutos % 60}min`;
@@ -117,25 +124,21 @@ function calcularResumoTurno() {
   Object.assign(turnoAtivo, {
     kmPercorrido,
     minutosTrabalhados: minutos,
-    horasDecimais: horasDec,
     horasTrabalhadasTexto: horasTexto,
     valorHora,
     lucro
   });
 
-  document.getElementById('resumoTurno').innerHTML = `
-    KM Percorrido: ${kmPercorrido}<br>
-    Horas: ${horasTexto}<br>
-    Valor Hora: R$ ${valorHora.toFixed(2)}<br>
-    Lucro: R$ ${lucro.toFixed(2)}
-  `;
+  document.querySelector('#resumoTurno input:nth-of-type(1)').value = kmPercorrido;
+  document.querySelector('#resumoTurno input:nth-of-type(2)').value = horasTexto;
+  document.querySelector('#resumoTurno input:nth-of-type(3)').value = valorHora.toFixed(2);
+  document.querySelector('#resumoTurno input:nth-of-type(4)').value = lucro.toFixed(2);
 }
 
 /* ========= SALVAR TURNO ========= */
 
 function salvarTurno() {
-  const dados =
-    JSON.parse(localStorage.getItem('controleDiario')) || {};
+  const dados = JSON.parse(localStorage.getItem('controleDiario')) || {};
 
   if (!dados[turnoAtivo.data]) dados[turnoAtivo.data] = [];
   dados[turnoAtivo.data].push(turnoAtivo);
@@ -145,7 +148,7 @@ function salvarTurno() {
 
   turnoAtivo = null;
   carregarHistorico();
-  mostrarTela('telaMenu');
+  irPara('menu');
 }
 
 /* ========= HISTÓRICO ========= */
@@ -154,8 +157,7 @@ function carregarHistorico() {
   const lista = document.getElementById('listaHistorico');
   lista.innerHTML = '';
 
-  const dados =
-    JSON.parse(localStorage.getItem('controleDiario')) || {};
+  const dados = JSON.parse(localStorage.getItem('controleDiario')) || {};
 
   Object.keys(dados).sort().reverse().forEach(data => {
     dados[data].slice().reverse().forEach((t, i) => {
@@ -182,4 +184,13 @@ window.onload = () => {
   const r = JSON.parse(localStorage.getItem('turnoRascunho'));
   if (r) turnoAtivo = r;
   carregarHistorico();
+
+  ['horaInicio', 'horaFim'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', e => {
+        e.target.value = formatarHora(e.target.value);
+      });
+    }
+  });
 };
