@@ -2,152 +2,280 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Controle de Turnos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
+  <title>Controle Diário V3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="./manifest.json">
+
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 10px; }
-    .tela { display: none; }
-    .tela.ativa { display: block; }
-    .linha { margin-bottom: 10px; }
-    label { display: block; font-size: 14px; }
-    input { width: 100%; padding: 6px; }
-    button { padding: 8px 12px; margin-top: 5px; }
-    .nav { margin-top: 20px; display: flex; justify-content: space-between; }
-    .readonly { background: #eee; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .app {
+      width: 360px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    .linha {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    label {
+      flex: 1;
+      font-size: 14px;
+    }
+
+    input {
+      flex: 1;
+      padding: 5px;
+    }
+
+    button {
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .readonly {
+      background: #eee;
+    }
+
+    .tela {
+      display: none;
+    }
+
+    .tela.ativa {
+      display: block;
+    }
+
+    .menu button {
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 10px;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    #listaHistorico {
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+
+    .registro {
+      border-bottom: 1px solid #ccc;
+      padding: 6px 0;
+    }
   </style>
 </head>
 <body>
 
-<!-- MENU -->
-<section id="menu" class="tela ativa">
-  <h2>Menu</h2>
-  <button onclick="irPara('inicioTurno')">Iniciar Turno</button>
-  <button onclick="irPara('resumoDia')">Resumo do Dia</button>
-  <button onclick="irPara('historico')">Histórico Geral</button>
-</section>
+<div class="app">
 
-<!-- INICIO TURNO -->
-<section id="inicioTurno" class="tela">
-  <h2>Início de Turno</h2>
+  <!-- ================= MENU ================= -->
+  <section id="menu" class="tela ativa menu">
+    <h2>Menu</h2>
+    <button onclick="irPara('inicioTurno')">▶ Iniciar Turno</button>
+    <button onclick="irPara('custos')">⛽ Custos</button>
+    <button onclick="irPara('fimTurno')">⏹ Fim de Turno</button>
+    <button onclick="irPara('resumoTurno')">📊 Resumo do Turno</button>
+    <button onclick="irPara('resumoDia')">📅 Resumo do Dia</button>
+    <button onclick="irPara('historicoTurnos')">📜 Histórico de Turnos</button>
+    <button onclick="irPara('historicoGeral')">📚 Histórico Geral</button>
+  </section>
 
-  <div class="linha">
-    <label>Data</label>
-    <input type="date" id="dataTurno">
-  </div>
+  <!-- ================= INÍCIO DE TURNO ================= -->
+  <section id="inicioTurno" class="tela">
+    <h2>Início de Turno</h2>
 
-  <div class="linha">
-    <label>Hora Início</label>
-    <input type="time" id="horaInicio">
-    <button onclick="capturarHora('horaInicio')">Capturar Hora</button>
-  </div>
+    <div class="linha">
+      <label>Data</label>
+      <input id="dataTurno" type="date">
+    </div>
 
-  <div class="linha">
-    <label>KM Inicial</label>
-    <input type="number" id="kmInicial">
-  </div>
+    <div class="linha">
+      <label>Hora Início</label>
+      <input id="horaInicio" type="text" placeholder="HH:MM">
+      <button onclick="capturarHora('horaInicio')">⏱</button>
+    </div>
 
-  <button onclick="inserirInicioTurno()">Inserir Dados</button>
+    <div class="linha">
+      <label>KM Inicial</label>
+      <input id="kmInicial" type="number">
+    </div>
 
-  <div class="nav">
-    <button onclick="irPara('menu')">⬅ Menu</button>
-    <button onclick="irPara('custos')">Avançar ➡</button>
-  </div>
-</section>
+    <button onclick="confirmarInicioTurno()" style="width:100%">Inserir Dados</button>
 
-<!-- CUSTOS -->
-<section id="custos" class="tela">
-  <h2>Custos</h2>
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+      <button onclick="irPara('custos')">Avançar ➡</button>
+    </div>
+  </section>
 
-  <div class="linha">
-    <label>Abastecimento</label>
-    <input type="number" id="abastecimentoValor">
-    <button onclick="addAbastecimento()">+</button>
-  </div>
+  <!-- ================= CUSTOS ================= -->
+  <section id="custos" class="tela">
+    <h2>Custos</h2>
 
-  <div class="linha">
-    <label>Total Abastecido</label>
-    <input class="readonly" id="totalAbastecido" readonly>
-  </div>
+    <div class="linha">
+      <label>Abastecimento</label>
+      <input id="inputAbastecimento" type="number">
+      <button onclick="addAbastecimento()">+</button>
+    </div>
 
-  <div class="linha">
-    <label>Outros Custos</label>
-    <input type="number" id="outrosCustosValor">
-    <button onclick="addOutrosCustos()">+</button>
-  </div>
+    <div class="linha">
+      <label>Total Abastecido</label>
+      <input id="totalAbastecido" class="readonly" readonly>
+    </div>
 
-  <div class="linha">
-    <label>Total Custos</label>
-    <input class="readonly" id="totalCustos" readonly>
-  </div>
+    <div class="linha">
+      <label>Alimentação</label>
+      <input id="inputAlimentacao" type="number">
+      <button onclick="addAlimentacao()">+</button>
+    </div>
 
-  <div class="linha">
-    <label>Apurado</label>
-    <input type="number" id="apuradoValor">
-    <button onclick="inserirApurado()">Inserir Dados</button>
-  </div>
+    <div class="linha">
+      <label>Outros Custos</label>
+      <input id="inputOutros" type="number">
+      <button onclick="addOutros()">+</button>
+    </div>
 
-  <div class="nav">
-    <button onclick="irPara('inicioTurno')">⬅ Voltar</button>
-    <button onclick="irPara('fimTurno')">Avançar ➡</button>
-  </div>
-</section>
+    <div class="linha">
+      <label>Total Custos</label>
+      <input id="totalCustos" class="readonly" readonly>
+    </div>
 
-<!-- FIM DE TURNO -->
-<section id="fimTurno" class="tela">
-  <h2>Fim de Turno</h2>
+    <div class="linha">
+      <label>Apurado</label>
+      <input id="apurado" type="number">
+      <button onclick="confirmarApurado()">✔</button>
+    </div>
 
-  <div class="linha">
-    <label>Hora Fim</label>
-    <input type="time" id="horaFim">
-    <button onclick="capturarHora('horaFim')">Capturar Hora</button>
-  </div>
+    <div class="nav">
+      <button onclick="irPara('inicioTurno')">⬅ Voltar</button>
+      <button onclick="irPara('fimTurno')">Avançar ➡</button>
+    </div>
+  </section>
 
-  <div class="linha">
-    <label>KM Final</label>
-    <input type="number" id="kmFinal">
-  </div>
+  <!-- ================= FIM DE TURNO ================= -->
+  <section id="fimTurno" class="tela">
+    <h2>Fim de Turno</h2>
 
-  <button onclick="inserirFimTurno()">Inserir Dados</button>
+    <div class="linha">
+      <label>Hora Final</label>
+      <input id="horaFim" type="text" placeholder="HH:MM">
+      <button onclick="capturarHora('horaFim')">⏱</button>
+    </div>
 
-  <div class="nav">
-    <button onclick="irPara('custos')">⬅ Voltar</button>
-    <button onclick="irPara('resumoTurno')">Avançar ➡</button>
-  </div>
-</section>
+    <div class="linha">
+      <label>KM Final</label>
+      <input id="kmFinal" type="number">
+    </div>
 
-<!-- RESUMO TURNO -->
-<section id="resumoTurno" class="tela">
-  <h2>Resumo do Turno</h2>
-  <div id="resumoTurnoConteudo"></div>
+    <button onclick="confirmarFimTurno()" style="width:100%">Inserir Dados</button>
 
-  <button onclick="salvarTurno()">Salvar Turno</button>
+    <div class="nav">
+      <button onclick="irPara('custos')">⬅ Voltar</button>
+      <button onclick="irPara('resumoTurno')">Avançar ➡</button>
+    </div>
+  </section>
 
-  <div class="nav">
-    <button onclick="irPara('menu')">Menu</button>
-  </div>
-</section>
+  <!-- ================= RESUMO DO TURNO ================= -->
+  <section id="resumoTurno" class="tela">
+    <h2>Resumo do Turno</h2>
 
-<!-- RESUMO DO DIA -->
-<section id="resumoDia" class="tela">
-  <h2>Resumo do Dia</h2>
-  <div id="resumoDiaConteudo"></div>
+    <div class="linha">
+      <label>KM Percorridos</label>
+      <input id="resKm" class="readonly" readonly>
+    </div>
 
-  <div class="nav">
-    <button onclick="irPara('menu')">⬅ Menu</button>
-  </div>
-</section>
+    <div class="linha">
+      <label>Horas Trabalhadas</label>
+      <input id="resHoras" class="readonly" readonly>
+    </div>
 
-<!-- HISTÓRICO -->
-<section id="historico" class="tela">
-  <h2>Histórico Geral</h2>
-  <div id="historicoConteudo"></div>
+    <div class="linha">
+      <label>Valor Hora</label>
+      <input id="resValorHora" class="readonly" readonly>
+    </div>
 
-  <div class="nav">
-    <button onclick="irPara('menu')">⬅ Menu</button>
-  </div>
-</section>
+    <div class="linha">
+      <label>Lucro</label>
+      <input id="resLucro" class="readonly" readonly>
+    </div>
 
-<script src="app.js"></script>
+    <button onclick="salvarTurno()" style="width:100%">💾 Salvar Turno</button>
+
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+  <!-- ================= RESUMO DO DIA ================= -->
+  <section id="resumoDia" class="tela">
+    <h2>Resumo do Dia</h2>
+    <div id="conteudoResumoDia">(em desenvolvimento)</div>
+
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+  <!-- ================= HISTÓRICO DE TURNOS ================= -->
+  <section id="historicoTurnos" class="tela">
+    <h2>Histórico de Turnos</h2>
+    <div id="listaHistoricoTurnos"></div>
+
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+  <!-- ================= HISTÓRICO GERAL ================= -->
+  <section id="historicoGeral" class="tela">
+    <h2>Histórico Geral</h2>
+    <div id="listaHistoricoGeral"></div>
+
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  function irPara(id) {
+    document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+    document.getElementById(id).classList.add('ativa');
+  }
+
+  function capturarHora(id) {
+    const d = new Date();
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    document.getElementById(id).value = `${h}:${m}`;
+  }
+</script>
+
+<script src="./app.js"></script>
+
 </body>
 </html>
