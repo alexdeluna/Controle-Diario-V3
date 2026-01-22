@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Controle Diário V3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="manifest" href="./manifest.json">
 
   <style>
     body {
@@ -33,13 +32,16 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
+      gap: 5px;
     }
 
     input {
       width: 140px;
+      padding: 5px;
     }
 
     button {
+      padding: 6px 10px;
       cursor: pointer;
     }
 
@@ -66,17 +68,6 @@
       justify-content: space-between;
       margin-top: 15px;
     }
-
-    #listaHistorico {
-      max-height: 300px;
-      overflow-y: auto;
-      font-size: 13px;
-    }
-
-    .dia {
-      border-bottom: 1px solid #ccc;
-      padding: 6px 0;
-    }
   </style>
 </head>
 <body>
@@ -90,8 +81,6 @@
     <button onclick="irPara('custos')">⛽ Custos</button>
     <button onclick="irPara('fimTurno')">⏹ Fim de Turno</button>
     <button onclick="irPara('resumoTurno')">📊 Resumo do Turno</button>
-    <button onclick="irPara('resumoDia')">📅 Resumo do Dia</button>
-    <button onclick="irPara('historico')">📜 Histórico</button>
   </section>
 
   <!-- INÍCIO DE TURNO -->
@@ -105,13 +94,13 @@
 
     <div class="linha">
       <label>Hora Inicial</label>
-      <input id="horaInicio" type="text" placeholder="HH:MM">
-      <button onclick="capturarHoraInput('horaInicio')">⏱</button>
+      <input id="horaInicial" type="text" placeholder="HH:MM">
     </div>
+
+    <button style="width:100%" onclick="inserirInicioTurno()">✔ Inserir Dados</button>
 
     <div class="nav">
       <button onclick="irPara('menu')">⬅ Menu</button>
-      <button onclick="iniciarTurno()">Avançar ➡</button>
     </div>
   </section>
 
@@ -144,6 +133,7 @@
     <div class="linha">
       <label>Apurado</label>
       <input id="apurado" type="number">
+      <button onclick="inserirApurado()">✔</button>
     </div>
 
     <div class="nav">
@@ -163,13 +153,13 @@
 
     <div class="linha">
       <label>Hora Final</label>
-      <input id="horaFim" type="text" placeholder="HH:MM">
-      <button onclick="capturarHoraInput('horaFim')">⏱</button>
+      <input id="horaFinal" type="text" placeholder="HH:MM">
     </div>
+
+    <button style="width:100%" onclick="inserirFimTurno()">✔ Inserir Dados</button>
 
     <div class="nav">
       <button onclick="irPara('custos')">⬅ Custos</button>
-      <button onclick="finalizarTurno()">Avançar ➡</button>
     </div>
   </section>
 
@@ -179,47 +169,20 @@
 
     <div class="linha">
       <label>KM Percorrido</label>
-      <input class="readonly" readonly>
+      <strong id="resKm">-</strong>
     </div>
 
     <div class="linha">
-      <label>Horas Trabalhadas</label>
-      <input class="readonly" readonly>
+      <label>Tempo Trabalhado</label>
+      <strong id="resHoras">-</strong>
     </div>
 
     <div class="linha">
-      <label>Valor Hora</label>
-      <input class="readonly" readonly>
+      <label>Lucro</label>
+      <strong>R$ <span id="resLucro">-</span></strong>
     </div>
 
-    <div class="linha">
-      <strong>Lucro</strong>
-      <input class="readonly" readonly>
-    </div>
-
-    <button style="width:100%;margin-top:10px" onclick="salvarTurno()">
-      💾 Salvar Turno
-    </button>
-
-    <div class="nav">
-      <button onclick="irPara('menu')">⬅ Menu</button>
-    </div>
-  </section>
-
-  <!-- RESUMO DO DIA -->
-  <section id="resumoDia" class="tela">
-    <h2>Resumo do Dia</h2>
-    <div id="resumoDiaConteudo">(em desenvolvimento)</div>
-
-    <div class="nav">
-      <button onclick="irPara('menu')">⬅ Menu</button>
-    </div>
-  </section>
-
-  <!-- HISTÓRICO -->
-  <section id="historico" class="tela">
-    <h2>Histórico</h2>
-    <div id="listaHistorico"></div>
+    <button style="width:100%;margin-top:10px" onclick="salvarTurno()">💾 Salvar Turno</button>
 
     <div class="nav">
       <button onclick="irPara('menu')">⬅ Menu</button>
@@ -228,18 +191,6 @@
 
 </div>
 
-<script src="./app.js"></script>
-
-<script>
-  function irPara(id) {
-    document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
-    document.getElementById(id).classList.add('ativa');
-  }
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-  }
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
