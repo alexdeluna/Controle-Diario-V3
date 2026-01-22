@@ -1,89 +1,89 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Controle Diário V3</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="manifest" href="./manifest.json">
-
-<style>
-body { font-family: Arial; background:#f2f2f2; margin:0 }
-.app { width:360px; margin:auto; background:#fff; min-height:100vh; padding:15px }
-.linha { display:flex; justify-content:space-between; margin-bottom:10px }
-input { width:140px }
-button { cursor:pointer }
-.readonly { background:#eee }
-.tela { display:none }
-.tela.ativa { display:block }
-.menu button { width:100%; margin-bottom:8px; padding:10px }
-</style>
+  <meta charset="UTF-8" />
+  <title>Controle de Turno</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .tela { display: none; }
+    .ativa { display: block; }
+    button { margin: 5px; }
+    input { display: block; margin-bottom: 10px; padding: 5px; }
+    h2 { margin-top: 0; }
+  </style>
 </head>
-
 <body>
-<div class="app">
 
-<section id="menu" class="tela ativa menu">
-<h2>Menu</h2>
-<button onclick="irPara('inicioTurno')">Iniciar Turno</button>
-<button onclick="irPara('custos')">Custos</button>
-<button onclick="irPara('fimTurno')">Fim de Turno</button>
-<button onclick="irPara('resumoTurno')">Resumo Turno</button>
-</section>
-
-<section id="inicioTurno" class="tela">
-<h2>Início Turno</h2>
-<div class="linha"><label>KM Inicial</label><input id="kmInicial" type="number"></div>
-<div class="linha">
-<label>Hora Inicial</label>
-<input id="horaInicial" type="text" placeholder="HH:MM">
-<button onclick="capturarHora('horaInicial')">⏱</button>
-</div>
-<button onclick="inserirInicioTurno()">Inserir Dados</button>
-</section>
-
-<section id="custos" class="tela">
-<h2>Custos</h2>
-<div class="linha">
-<input id="valorAbastecimento" type="number">
-<button onclick="addAbastecimento()">+</button>
-</div>
-<input id="totalAbastecido" class="readonly" readonly>
-
-<div class="linha">
-<input id="valorOutro" type="number">
-<button onclick="addOutroCusto()">+</button>
-</div>
-<input id="totalCustos" class="readonly" readonly>
-
-<div class="linha">
-<label>Apurado</label>
-<input id="apurado" type="number">
-<button onclick="inserirApurado()">Inserir</button>
+<!-- 1 MENU -->
+<div id="tela-menu" class="tela ativa">
+  <h2>Menu</h2>
+  <button onclick="irPara('inicio')">Iniciar Turno</button>
+  <button onclick="irPara('custos')">Custos</button>
+  <button onclick="irPara('fim')">Fim de Turno</button>
+  <button onclick="irPara('resumo')">Resumo do Turno</button>
 </div>
 
-<button onclick="irPara('fimTurno')">Avançar</button>
-</section>
+<!-- 2 INICIAR TURNO -->
+<div id="tela-inicio" class="tela">
+  <h2>Iniciar Turno</h2>
 
-<section id="fimTurno" class="tela">
-<h2>Fim Turno</h2>
-<div class="linha"><label>KM Final</label><input id="kmFinal" type="number"></div>
-<div class="linha">
-<label>Hora Final</label>
-<input id="horaFinal" type="text" placeholder="HH:MM">
-<button onclick="capturarHora('horaFinal')">⏱</button>
+  <label>Hora início</label>
+  <input id="horaInicio" readonly>
+
+  <label>KM Inicial</label>
+  <input id="kmInicial" type="number">
+
+  <button onclick="inserirInicio()">Inserir dados</button>
+  <button onclick="irPara('menu')">Voltar</button>
+  <button onclick="irPara('custos')">Avançar</button>
 </div>
-<button onclick="inserirFimTurno()">Inserir Dados</button>
-</section>
 
-<section id="resumoTurno" class="tela">
-<h2>Resumo</h2>
-<input id="resKm" class="readonly" readonly>
-<input id="resHoras" class="readonly" readonly>
-<input id="resValorHora" class="readonly" readonly>
-<input id="resLucro" class="readonly" readonly>
-<button onclick="salvarTurno()">Salvar Turno</button>
-</section>
+<!-- 3 CUSTOS -->
+<div id="tela-custos" class="tela">
+  <h2>Custos</h2>
 
+  <label>Abastecimento</label>
+  <input id="abastecimento" type="number">
+  <button onclick="addCusto('abastecimento')">+</button>
+
+  <label>Alimentação</label>
+  <input id="alimentacao" type="number">
+  <button onclick="addCusto('alimentacao')">+</button>
+
+  <label>Outros Custos</label>
+  <input id="outros" type="number">
+  <button onclick="addCusto('outros')">+</button>
+
+  <label>Apurado</label>
+  <input id="apurado" type="number">
+  <button onclick="inserirApurado()">Inserir dados</button>
+
+  <button onclick="irPara('inicio')">Voltar</button>
+  <button onclick="irPara('fim')">Avançar</button>
+</div>
+
+<!-- 4 FIM DE TURNO -->
+<div id="tela-fim" class="tela">
+  <h2>Fim de Turno</h2>
+
+  <label>Hora fim</label>
+  <input id="horaFim" readonly>
+
+  <label>KM Final</label>
+  <input id="kmFinal" type="number">
+
+  <button onclick="inserirFim()">Inserir dados</button>
+  <button onclick="irPara('custos')">Voltar</button>
+  <button onclick="irPara('resumo')">Avançar</button>
+</div>
+
+<!-- 5 RESUMO -->
+<div id="tela-resumo" class="tela">
+  <h2>Resumo do Turno</h2>
+  <div id="resumo"></div>
+
+  <button onclick="salvarTurno()">Salvar Turno</button>
+  <button onclick="irPara('menu')">Voltar ao Menu</button>
 </div>
 
 <script src="app.js"></script>
