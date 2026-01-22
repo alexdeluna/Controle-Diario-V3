@@ -1,7 +1,22 @@
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open('controle-v1').then(cache => {
-      return cache.addAll(['index.html','app.js']);
+const CACHE_NAME = 'controle-diario-v3';
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll([
+        './',
+        './index.html',
+        './app.js',
+        './manifest.json'
+      ]);
+    })
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
     })
   );
 });
