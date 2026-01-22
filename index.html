@@ -36,7 +36,7 @@
     }
 
     input {
-      width: 130px;
+      width: 140px;
     }
 
     button {
@@ -106,12 +106,12 @@
     <div class="linha">
       <label>Hora Inicial</label>
       <input id="horaInicio" type="text" placeholder="HH:MM">
-      <button>⏱</button>
+      <button onclick="capturarHoraInput('horaInicio')">⏱</button>
     </div>
 
     <div class="nav">
       <button onclick="irPara('menu')">⬅ Menu</button>
-      <button onclick="irPara('custos')">Avançar ➡</button>
+      <button onclick="iniciarTurno()">Avançar ➡</button>
     </div>
   </section>
 
@@ -121,29 +121,29 @@
 
     <div class="linha">
       <label>Abastecimento</label>
-      <input type="number">
-      <button>+</button>
+      <input id="abastecimento" type="number">
+      <button onclick="addAbastecimento()">+</button>
     </div>
 
     <div class="linha">
       <label>Total Abastecido</label>
-      <input class="readonly" readonly>
+      <input id="totalAbastecido" class="readonly" readonly>
     </div>
 
     <div class="linha">
       <label>Outros Custos</label>
-      <input type="number">
-      <button>+</button>
+      <input id="outroCusto" type="number">
+      <button onclick="addOutroCusto()">+</button>
     </div>
 
     <div class="linha">
       <label>Total Custos</label>
-      <input class="readonly" readonly>
+      <input id="totalCustos" class="readonly" readonly>
     </div>
 
     <div class="linha">
       <label>Apurado</label>
-      <input type="number">
+      <input id="apurado" type="number">
     </div>
 
     <div class="nav">
@@ -164,12 +164,12 @@
     <div class="linha">
       <label>Hora Final</label>
       <input id="horaFim" type="text" placeholder="HH:MM">
-      <button>⏱</button>
+      <button onclick="capturarHoraInput('horaFim')">⏱</button>
     </div>
 
     <div class="nav">
       <button onclick="irPara('custos')">⬅ Custos</button>
-      <button onclick="irPara('resumoTurno')">Avançar ➡</button>
+      <button onclick="finalizarTurno()">Avançar ➡</button>
     </div>
   </section>
 
@@ -197,7 +197,9 @@
       <input class="readonly" readonly>
     </div>
 
-    <button style="width:100%;margin-top:10px">💾 Salvar Turno</button>
+    <button style="width:100%;margin-top:10px" onclick="salvarTurno()">
+      💾 Salvar Turno
+    </button>
 
     <div class="nav">
       <button onclick="irPara('menu')">⬅ Menu</button>
@@ -226,23 +228,18 @@
 
 </div>
 
+<script src="./app.js"></script>
+
 <script>
   function irPara(id) {
     document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
     document.getElementById(id).classList.add('ativa');
   }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+  }
 </script>
 
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
-    .then(() => console.log('SW registrado'))
-    .catch(err => console.error('SW erro:', err));
-}
-</script>
-
-  
 </body>
 </html>
-
-
