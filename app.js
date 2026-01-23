@@ -1,22 +1,34 @@
 /******************************
- * ESTADO GLOBAL COM PERSISTÊNCIA
+ * ESTADO GLOBAL E PERSISTÊNCIA
  ******************************/
-// Carrega do LocalStorage ou inicia um estado vazio
 let estado = JSON.parse(localStorage.getItem('controleDiarioV3')) || {
   turnoAtual: null,
   turnos: []
 };
 
-// Salva no LocalStorage sempre que houver mudanças
 function salvar() {
   localStorage.setItem('controleDiarioV3', JSON.stringify(estado));
 }
 
 /******************************
- * UTILITÁRIOS
+ * TRATAMENTO DE HORA (Ajuste solicitado)
  ******************************/
-function hojeISO() {
-  return new Date().toISOString().split('T')[0];
+function tratarEntradaHora(valor) {
+  // Remove tudo que não é número
+  let num = valor.replace(/\D/g, '');
+  
+  // Se digitou 3 números (ex: 620), vira 0620
+  if (num.length === 3) num = '0' + num;
+  
+  // Se tem 4 números, formata HH:MM
+  if (num.length === 4) {
+    const hh = num.substring(0, 2);
+    const mm = num.substring(2, 4);
+    if (parseInt(hh) < 24 && parseInt(mm) < 60) {
+      return `${hh}:${mm}`;
+    }
+  }
+  return valor; // Retorna original se não conseguir formatar
 }
 
 function validarHora(hora) {
@@ -28,30 +40,28 @@ function diffHoras(h1, h2) {
   const [bH, bM] = h2.split(':').map(Number);
   let inicio = aH * 60 + aM;
   let fim = bH * 60 + bM;
-  if (fim < inicio) fim += 24 * 60; // Trata virada de dia (ex: 22h às 04h)
+  if (fim < inicio) fim += 24 * 60; // Virada de dia
   return (fim - inicio) / 60;
 }
 
 /******************************
- * LÓGICA DE TURNOS
+ * FUNÇÕES DE AÇÃO
  ******************************/
 
 function confirmarInicioTurno() {
-  let inputHora = document.getElementById('horaInicio');
-  // Aplica o tratamento antes de validar
-  inputHora.value = tratarEntradaHora(inputHora.value.trim());
+  const inputHora = document.getElementById('horaInicio');
+  inputHora.value = tratarEntradaHora(inputHora.value);
   
   const hora = inputHora.value;
   const km = Number(document.getElementById('kmInicial').value);
 
-  if (!validarHora(hora)) {
-    alert('Hora inválida. Tente digitar 4 números (ex: 0620)');
+  if (!validarHora(hora) || isNaN(km) || km <= 0) {
+    alert('Verifique a Hora (ex: 0620) e o KM!');
     return;
   }
 
-  // Inicia novo objeto mantendo a data de início para o resumo
   estado.turnoAtual = {
-    data: hojeISO(),
+    data: new Date().toISOString().split('T')[0],
     horaInicio: hora,
     kmInicial: km,
     horaFim: '',
@@ -61,27 +71,29 @@ function confirmarInicioTurno() {
   };
 
   salvar();
-  alert('Turno Iniciado!');
+  alert('Turno iniciado com sucesso!');
   irPara('menu');
 }
 
 function adicionarAbastecimento() {
-  const valor = Number(document.getElementById('valorAbastecimento').value);
+  const input = document.getElementById('valorAbastecimento');
+  const valor = Number(input.value);
   if (valor > 0) {
     estado.turnoAtual.custos.abastecimento += valor;
     document.getElementById('totalAbastecido').value = estado.turnoAtual.custos.abastecimento.toFixed(2);
-    document.getElementById('valorAbastecimento').value = '';
+    input.value = '';
     atualizarTotalCustos();
     salvar();
   }
 }
 
 function adicionarOutrosCustos() {
-  const valor = Number(document.getElementById('valorOutrosCustos').value);
+  const input = document.getElementById('valorOutrosCustos');
+  const valor = Number(input.value);
   if (valor > 0) {
     estado.turnoAtual.custos.outros += valor;
     document.getElementById('totalOutrosCustos').value = estado.turnoAtual.custos.outros.toFixed(2);
-    document.getElementById('valorOutrosCustos').value = '';
+    input.value = '';
     atualizarTotalCustos();
     salvar();
   }
@@ -94,54 +106,34 @@ function atualizarTotalCustos() {
 
 function inserirApurado() {
   const valor = Number(document.getElementById('apurado').value);
-  estado.turnoAtual.apurado = valor;
-  salvar();
-  alert('Ganhos salvos!');
+  if (estado.turnoAtual) {
+    estado.turnoAtual.apurado = valor;
+    salvar();
+    alert('Dados salvos!');
+  }
 }
 
 function confirmarFimTurno() {
- let inputHora = document.getElementById('horaFim');
-  // Aplica o tratamento antes de validar
-  inputHora.value = tratarEntradaHora(inputHora.value.trim());
+  const inputHora = document.getElementById('horaFim');
+  inputHora.value = tratarEntradaHora(inputHora.value);
   
   const hora = inputHora.value;
   const km = Number(document.getElementById('kmFinal').value);
 
-  if (!validarHora(hora)) {
-    alert('Hora inválida. Tente digitar 4 números (ex: 1845)');
+  if (!validarHora(hora) || km <= estado.turnoAtual.kmInicial) {
+    alert('Verifique a Hora e o KM Final (deve ser maior que o inicial)!');
     return;
   }
 
   estado.turnoAtual.horaFim = hora;
   estado.turnoAtual.kmFinal = km;
   salvar();
-  alert('Turno finalizado! Veja o resumo.');
   irPara('resumoTurno');
-  carregarResumoTurno();
 }
-
-function salvarTurnoNoHistorico() {
-  if (!estado.turnoAtual.horaFim) {
-    alert("Finalize o turno antes de salvar no histórico!");
-    return;
-  }
-  
-  // Adiciona ao histórico e limpa o atual
-  estado.turnos.push({ ...estado.turnoAtual });
-  estado.turnoAtual = null; // LIMPEZA para novo turno
-  
-  salvar();
-  alert('Turno arquivado com sucesso!');
-  window.location.reload(); // Recarrega para zerar a interface
-}
-
-/******************************
- * RESUMOS E HISTÓRICO
- ******************************/
 
 function carregarResumoTurno() {
   const t = estado.turnoAtual;
-  if (!t) return;
+  if (!t || !t.horaFim) return;
 
   const horas = diffHoras(t.horaInicio, t.horaFim);
   const km = t.kmFinal - t.kmInicial;
@@ -156,9 +148,42 @@ function carregarResumoTurno() {
   document.getElementById('resumoValorHora').innerText = "R$ " + vHora.toFixed(2) + "/h";
 }
 
-// Registro do Service Worker para PWA
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+function salvarTurnoNoHistorico() {
+  if (estado.turnoAtual && estado.turnoAtual.horaFim) {
+    estado.turnos.push({...estado.turnoAtual});
+    estado.turnoAtual = null;
+    salvar();
+    alert('Turno arquivado!');
+    window.location.reload(); 
+  }
+}
+
+function carregarHistoricoGeral() {
+  const lista = document.getElementById('listaHistorico');
+  lista.innerHTML = '';
+  estado.turnos.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.style.borderBottom = "1px solid #ccc";
+    li.style.padding = "10px 0";
+    const lucro = t.apurado - (t.custos.abastecimento + t.custos.outros);
+    li.innerHTML = `<strong>Data: ${t.data}</strong><br>Lucro: R$ ${lucro.toFixed(2)} | KM: ${t.kmFinal - t.kmInicial}`;
+    lista.appendChild(li);
+  });
+}
+
+function carregarResumoDia() {
+  const hoje = new Date().toISOString().split('T')[0];
+  const turnosDia = estado.turnos.filter(t => t.data === hoje);
+  let lucroTotal = 0;
+  let kmTotal = 0;
+
+  turnosDia.forEach(t => {
+    lucroTotal += (t.apurado - (t.custos.abastecimento + t.custos.outros));
+    kmTotal += (t.kmFinal - t.kmInicial);
+  });
+
+  document.getElementById('diaLucro').innerText = "R$ " + lucroTotal.toFixed(2);
+  document.getElementById('diaKM').innerText = kmTotal + " km";
 }
 
 function limparTodoHistorico() {
@@ -169,3 +194,7 @@ function limparTodoHistorico() {
   }
 }
 
+// Registro do SW para 2026
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(e => console.log(e));
+}
