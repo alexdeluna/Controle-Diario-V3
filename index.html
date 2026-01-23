@@ -133,16 +133,23 @@
   </section>
 
   <!-- TELA: RESUMO DO DIA -->
-  <section id="resumoDia" class="tela">
-    <h2>📅 Resumo do Dia (Hoje)</h2>
-    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px;">
-      <p>Lucro Total Hoje: <strong id="diaLucro">0.00</strong></p>
-      <p>KM Total Hoje: <strong id="diaKM">0</strong></p>
-    </div>
-    <div class="nav">
-      <button onclick="irPara('menu')">⬅ Menu</button>
-    </div>
-  </section>
+  <!-- TELA: RESUMO DO DIA (Atualize esta seção no index.html) -->
+<section id="resumoDia" class="tela">
+  <h2>📅 Resumo do Dia (Hoje)</h2>
+  <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; line-height: 2;">
+    <p>Intervalo Trabalhado: <strong id="diaHorasTrabalhadas">00:00h</strong></p>
+    <p>KM Total Rodado: <strong id="diaKM">0 km</strong></p>
+    <p>Total Abastecido: <strong id="diaAbastecido">R$ 0.00</strong></p>
+    <p>Outros Custos: <strong id="diaOutrosCustos">R$ 0.00</strong></p>
+    <p>Valor Apurado: <strong id="diaApurado">R$ 0.00</strong></p>
+    <hr>
+    <p>Lucro do Dia: <strong id="diaLucro" style="color:green; font-size:1.2em;">R$ 0.00</strong></p>
+    <p>Valor Médio da Hora: <strong id="diaValorHora">R$ 0.00/h</strong></p>
+  </div>
+  <div class="nav">
+    <button onclick="irPara('menu')">⬅ Menu</button>
+  </div>
+</section>
 
   <!-- TELA: HISTÓRICO GERAL -->
   <section id="historicoGeral" class="tela">
@@ -182,5 +189,6 @@
 </html>
 
 </div>
+
 
 
