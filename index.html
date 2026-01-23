@@ -102,7 +102,7 @@
     <h2>⏹ Fim de Turno</h2>
     <div class="linha">
       <label>Hora Fim</label>
-      <input id="horaFim" type="tel" placeholder="Ex: 1845" maxlength="5">
+      <input id="horaFim" type="tel" placeholder="HH:MM" maxlength="5">
       <button onclick="capturarHora('horaFim')">⏱</button>
     </div>
     <div class="linha">
@@ -115,16 +115,15 @@
     </div>
   </section>
 
-  <!-- AS TELAS DE RESUMOS E HISTÓRICO SEGUEM NA PARTE 2 -->
-    <!-- TELA: RESUMO DO TURNO -->
+  <!-- TELA: RESUMO DO TURNO -->
   <section id="resumoTurno" class="tela">
     <h2>📊 Resumo do Turno</h2>
     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; line-height: 2;">
-        <p>Tempo de Turno: <strong id="resumoHoras">-</strong></p>
-      <p>KM Rodados: <strong id="resumoKM">-</strong></p>
-      <p>Custos Totais: <strong id="resumoCustos">-</strong></p>
-      <p>Lucro Líquido: <strong id="resumoLucro">-</strong></p>
-      <p>Valor por Hora: <strong id="resumoValorHora">-</strong></p>
+      <div>Tempo: <strong id="resumoHoras">-</strong></div>
+      <div>Rodado: <strong id="resumoKM">-</strong></div>
+      <div>Custos: <strong id="resumoCustos">-</strong></div>
+      <div>Lucro: <strong id="resumoLucro" style="color:green">-</strong></div>
+      <div>Valor/Hora: <strong id="resumoValorHora">-</strong></div>
     </div>
     <button class="btn-block btn-save" style="margin-top:20px" onclick="salvarTurnoNoHistorico()">✅ Arquivar e Limpar para Novo Turno</button>
     <div class="nav">
@@ -133,23 +132,22 @@
   </section>
 
   <!-- TELA: RESUMO DO DIA -->
-  <!-- TELA: RESUMO DO DIA (Atualize esta seção no index.html) -->
-<section id="resumoDia" class="tela">
-  <h2>📅 Resumo do Dia (Hoje)</h2>
-  <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; line-height: 2;">
-    <p>Intervalo Trabalhado: <strong id="diaHorasTrabalhadas">00:00h</strong></p>
-    <p>KM Total Rodado: <strong id="diaKM">0 km</strong></p>
-    <p>Total Abastecido: <strong id="diaAbastecido">R$ 0.00</strong></p>
-    <p>Outros Custos: <strong id="diaOutrosCustos">R$ 0.00</strong></p>
-    <p>Valor Apurado: <strong id="diaApurado">R$ 0.00</strong></p>
-    <hr>
-    <p>Lucro do Dia: <strong id="diaLucro" style="color:green; font-size:1.2em;">R$ 0.00</strong></p>
-    <p>Valor Médio da Hora: <strong id="diaValorHora">R$ 0.00/h</strong></p>
-  </div>
-  <div class="nav">
-    <button onclick="irPara('menu')">⬅ Menu</button>
-  </div>
-</section>
+  <section id="resumoDia" class="tela">
+    <h2>📅 Resumo do Dia (Hoje)</h2>
+    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; line-height: 2;">
+      <p>Intervalo Total: <strong id="diaHorasTrabalhadas">00:00h</strong></p>
+      <p>KM Total Rodado: <strong id="diaKM">0 km</strong></p>
+      <p>Total Abastecido: <strong id="diaAbastecido">R$ 0.00</strong></p>
+      <p>Outros Custos: <strong id="diaOutrosCustos">R$ 0.00</strong></p>
+      <p>Valor Apurado: <strong id="diaApurado">R$ 0.00</strong></p>
+      <hr>
+      <p>Lucro do Dia: <strong id="diaLucro" style="color:green; font-size:1.2em;">R$ 0.00</strong></p>
+      <p>Valor Médio da Hora: <strong id="diaValorHora">R$ 0.00/h</strong></p>
+    </div>
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
 
   <!-- TELA: HISTÓRICO GERAL -->
   <section id="historicoGeral" class="tela">
@@ -165,31 +163,7 @@
 
 </div> <!-- Fim da Div App -->
 
-<script>
-  // Função de navegação aprimorada
-  function irPara(id) {
-    document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
-    document.getElementById(id).classList.add('ativa');
-    
-    // Gatilhos automáticos para carregar dados nas telas
-    if(id === 'resumoTurno') carregarResumoTurno();
-    if(id === 'resumoDia') carregarResumoDia();
-    if(id === 'historicoGeral') carregarHistoricoGeral();
-  }
-
-  function capturarHora(id) {
-    const d = new Date();
-    const h = String(d.getHours()).padStart(2, '0');
-    const m = String(d.getMinutes()).padStart(2, '0');
-    document.getElementById(id).value = `${h}:${m}`;
-  }
-</script>
+<!-- Scripts -->
 <script src="./app.js"></script>
 </body>
 </html>
-
-</div>
-
-
-
-
