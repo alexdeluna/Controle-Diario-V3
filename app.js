@@ -37,11 +37,15 @@ function diffHoras(h1, h2) {
  ******************************/
 
 function confirmarInicioTurno() {
-  const hora = document.getElementById('horaInicio').value.trim();
+  let inputHora = document.getElementById('horaInicio');
+  // Aplica o tratamento antes de validar
+  inputHora.value = tratarEntradaHora(inputHora.value.trim());
+  
+  const hora = inputHora.value;
   const km = Number(document.getElementById('kmInicial').value);
 
-  if (!validarHora(hora) || isNaN(km) || km <= 0) {
-    alert('Verifique Hora (HH:MM) e KM Inicial!');
+  if (!validarHora(hora)) {
+    alert('Hora inválida. Tente digitar 4 números (ex: 0620)');
     return;
   }
 
@@ -96,11 +100,15 @@ function inserirApurado() {
 }
 
 function confirmarFimTurno() {
-  const hora = document.getElementById('horaFim').value.trim();
+ let inputHora = document.getElementById('horaFim');
+  // Aplica o tratamento antes de validar
+  inputHora.value = tratarEntradaHora(inputHora.value.trim());
+  
+  const hora = inputHora.value;
   const km = Number(document.getElementById('kmFinal').value);
 
-  if (!validarHora(hora) || km <= estado.turnoAtual.kmInicial) {
-    alert('Hora inválida ou KM final menor que inicial!');
+  if (!validarHora(hora)) {
+    alert('Hora inválida. Tente digitar 4 números (ex: 1845)');
     return;
   }
 
@@ -160,3 +168,4 @@ function limparTodoHistorico() {
     carregarHistoricoGeral();
   }
 }
+
