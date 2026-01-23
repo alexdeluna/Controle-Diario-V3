@@ -110,6 +110,7 @@ function inserirApurado() {
     estado.turnoAtual.apurado = valor;
     salvar();
     alert('Dados salvos!');
+    irPara('menu'); // Esta linha foi adicionada
   }
 }
 
@@ -221,4 +222,5 @@ function limparTodoHistorico() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(e => console.log(e));
 }
+
 
