@@ -3,127 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <title>Controle Diário V3</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#000000">
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      margin: 0;
-      padding: 0;
-    }
-
-    .app {
-      width: 360px;
-      margin: 0 auto;
-      background: #fff;
-      min-height: 100vh;
-      padding: 15px;
-      box-sizing: border-box;
-    }
-
-    h2 {
-      text-align: center;
-      margin-top: 0;
-    }
-
-    .linha {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      gap: 10px;
-    }
-
-    label {
-      flex: 1;
-      font-size: 14px;
-    }
-
-    input {
-      flex: 1;
-      padding: 5px;
-    }
-
-    button {
-      padding: 6px 10px;
-      cursor: pointer;
-    }
-
-    .readonly {
-      background: #eee;
-    }
-
-    .tela {
-      display: none;
-    }
-
-    .tela.ativa {
-      display: block;
-    }
-
-    .menu button {
-      width: 100%;
-      margin-bottom: 8px;
-      padding: 10px;
-    }
-
-    .nav {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
-    }
+    body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+    .app { max-width: 500px; margin: 0 auto; background: #fff; min-height: 100vh; padding: 20px; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    .linha { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
+    label { flex: 1; font-size: 14px; font-weight: bold; }
+    input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+    button { padding: 10px; cursor: pointer; border: none; border-radius: 4px; background: #007bff; color: white; font-weight: bold; }
+    button:active { opacity: 0.8; }
+    .readonly { background: #e9ecef; color: #495057; }
+    .tela { display: none; }
+    .tela.ativa { display: block; }
+    .menu button { width: 100%; margin-bottom: 10px; padding: 15px; font-size: 16px; text-align: left; }
+    .nav { display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
+    .btn-block { width: 100%; margin-top: 10px; }
+    .btn-save { background: #28a745; }
+    .btn-danger { background: #dc3545; }
   </style>
 </head>
 <body>
 
 <div class="app">
 
-  <!-- MENU -->
+  <!-- TELA: MENU -->
   <section id="menu" class="tela ativa menu">
-    <h2>Menu</h2>
+    <h2>Menu Principal</h2>
     <button onclick="irPara('inicioTurno')">▶ Iniciar Turno</button>
-    <button onclick="irPara('custos')">⛽ Custos</button>
-    <button onclick="irPara('fimTurno')">⏹ Fim de Turno</button>
-    <button onclick="irPara('resumoTurno')">📊 Resumo do Turno</button>
+    <button onclick="irPara('custos')">⛽ Lançar Custos / Ganhos</button>
+    <button onclick="irPara('fimTurno')">⏹ Finalizar Turno</button>
+    <button onclick="irPara('resumoTurno')">📊 Resumo do Turno Atual</button>
     <button onclick="irPara('resumoDia')">📅 Resumo do Dia</button>
-    <button onclick="irPara('historicoTurnos')">📜 Histórico de Turnos</button>
     <button onclick="irPara('historicoGeral')">📚 Histórico Geral</button>
   </section>
 
-  <!-- INÍCIO DE TURNO -->
+  <!-- TELA: INÍCIO DE TURNO -->
   <section id="inicioTurno" class="tela">
     <h2>Início de Turno</h2>
-
     <div class="linha">
       <label>Hora Início</label>
       <input id="horaInicio" type="text" placeholder="HH:MM">
       <button onclick="capturarHora('horaInicio')">⏱</button>
     </div>
-
     <div class="linha">
       <label>KM Inicial</label>
-      <input id="kmInicial" type="number">
+      <input id="kmInicial" type="number" placeholder="Ex: 12500">
     </div>
-
-    <button onclick="confirmarInicioTurno()" style="width:100%">Inserir Dados</button>
-
+    <button class="btn-block btn-save" onclick="confirmarInicioTurno()">✅ Iniciar Agora</button>
     <div class="nav">
       <button onclick="irPara('menu')">⬅ Menu</button>
-      <button onclick="irPara('custos')">Avançar ➡</button>
     </div>
   </section>
 
-  <!-- O RESTANTE DO HTML SEGUE IGUAL AO ANTERIOR -->
-  <!-- (custos, fimTurno, resumoTurno, resumoDia, históricos) -->
+  <!-- TELA: CUSTOS -->
+  <section id="custos" class="tela">
+    <h2>⛽ Custos e Ganhos</h2>
+    <div class="linha">
+      <label>Abastecimento R$</label>
+      <input id="valorAbastecimento" type="number" step="0.01">
+      <button onclick="adicionarAbastecimento()">+</button>
+    </div>
+    <div class="linha">
+      <label>Total Gasto ⛽</label>
+      <input id="totalAbastecido" class="readonly" type="text" readonly value="0.00">
+    </div>
+    <hr>
+    <div class="linha">
+      <label>Outros Custos R$</label>
+      <input id="valorOutrosCustos" type="number" step="0.01">
+      <button onclick="adicionarOutrosCustos()">+</button>
+    </div>
+    <div class="linha">
+      <label>Total Outros</label>
+      <input id="totalOutrosCustos" class="readonly" type="text" readonly value="0.00">
+    </div>
+    <div class="linha">
+      <label>TOTAL CUSTOS</label>
+      <input id="totalCustos" class="readonly" type="text" readonly style="font-weight:bold">
+    </div>
+    <hr>
+    <div class="linha">
+      <label>VALOR APURADO R$</label>
+      <input id="apurado" type="number" step="0.01" placeholder="Ganhos totais">
+    </div>
+    <button class="btn-block btn-save" onclick="inserirApurado()">💾 Salvar Dados</button>
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+      <button onclick="irPara('fimTurno')">Finalizar ➡</button>
+    </div>
+  </section>
 
-</div>
+  <!-- TELA: FIM DE TURNO -->
+  <section id="fimTurno" class="tela">
+    <h2>⏹ Fim de Turno</h2>
+    <div class="linha">
+      <label>Hora Fim</label>
+      <input id="horaFim" type="text" placeholder="HH:MM">
+      <button onclick="capturarHora('horaFim')">⏱</button>
+    </div>
+    <div class="linha">
+      <label>KM Final</label>
+      <input id="kmFinal" type="number">
+    </div>
+    <button class="btn-block btn-danger" onclick="confirmarFimTurno()">⏹ Encerrar Turno</button>
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+  <!-- AS TELAS DE RESUMOS E HISTÓRICO SEGUEM NA PARTE 2 -->
+    <!-- TELA: RESUMO DO TURNO -->
+  <section id="resumoTurno" class="tela">
+    <h2>📊 Resumo do Turno</h2>
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; line-height: 2;">
+      <div>Tempo: <strong id="resumoHoras">-</strong></div>
+      <div>Rodado: <strong id="resumoKM">-</strong></div>
+      <div>Custos: <strong id="resumoCustos">-</strong></div>
+      <div>Lucro: <strong id="resumoLucro" style="color:green">-</strong></div>
+      <div>Valor/Hora: <strong id="resumoValorHora">-</strong></div>
+    </div>
+    <button class="btn-block btn-save" style="margin-top:20px" onclick="salvarTurnoNoHistorico()">✅ Arquivar e Limpar para Novo Turno</button>
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+  <!-- TELA: RESUMO DO DIA -->
+  <section id="resumoDia" class="tela">
+    <h2>📅 Resumo do Dia (Hoje)</h2>
+    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px;">
+      <p>Lucro Total Hoje: <strong id="diaLucro">0.00</strong></p>
+      <p>KM Total Hoje: <strong id="diaKM">0</strong></p>
+    </div>
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+  <!-- TELA: HISTÓRICO GERAL -->
+  <section id="historicoGeral" class="tela">
+    <h2>📚 Histórico Geral</h2>
+    <ul id="listaHistorico" style="list-style: none; padding: 0;">
+      <!-- Itens inseridos via JS -->
+    </ul>
+    <button class="btn-block btn-danger" onclick="limparTodoHistorico()" style="font-size:12px">Apagar Todo Histórico</button>
+    <div class="nav">
+      <button onclick="irPara('menu')">⬅ Menu</button>
+    </div>
+  </section>
+
+</div> <!-- Fim da Div App -->
 
 <script>
+  // Função de navegação aprimorada
   function irPara(id) {
     document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
     document.getElementById(id).classList.add('ativa');
+    
+    // Gatilhos automáticos para carregar dados nas telas
+    if(id === 'resumoTurno') carregarResumoTurno();
+    if(id === 'resumoDia') carregarResumoDia();
+    if(id === 'historicoGeral') carregarHistoricoGeral();
   }
 
   function capturarHora(id) {
@@ -133,7 +177,8 @@
     document.getElementById(id).value = `${h}:${m}`;
   }
 </script>
-
 <script src="./app.js"></script>
 </body>
 </html>
+
+</div>
