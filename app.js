@@ -46,7 +46,8 @@ function tratarEntradaHora(valor) {
 }
 
 function validarHora(hora) {
-  return /^(\d|2[0-3]):([0-5]\d)$/.test(hora);
+  // Novo regex que aceita HH:MM, incluindo '00:00' até '23:59'
+  return /^(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$/.test(hora);
 }
 
 /******************************
@@ -59,9 +60,6 @@ function irPara(id) {
   
   if (telaDestino) {
     telaDestino.classList.add('ativa');
-  } else {
-    console.error(`Tela com id "${id}" não encontrada.`);
-    return;
   }
 
   // Gatilhos de carregamento de dados conforme a tela
@@ -117,7 +115,7 @@ function adicionarAbastecimento() {
     input.value = '';
     atualizarTotalCustos();
     salvar();
-  }
+  } else if (!estado.turnoAtual) { alert('Inicie um turno primeiro!'); }
 }
 
 function adicionarOutrosCustos() {
@@ -129,7 +127,7 @@ function adicionarOutrosCustos() {
     input.value = '';
     atualizarTotalCustos();
     salvar();
-  }
+  } else if (!estado.turnoAtual) { alert('Inicie um turno primeiro!'); }
 }
 
 function atualizarTotalCustos() {
@@ -146,7 +144,7 @@ function inserirApurado() {
     salvar();
     alert('Ganhos salvos! Voltando ao menu.');
     irPara('menu');
-  }
+  } else if (!estado.turnoAtual) { alert('Inicie um turno primeiro!'); }
 }
 
 function confirmarFimTurno() {
@@ -168,12 +166,14 @@ function confirmarFimTurno() {
 }
 
 function salvarTurnoNoHistorico() {
-  if (estado.turnoAtual && estado.turnoAtual.horaFim) {
+  if (estado.turnoAtual && estado.turnoAtual.horaFim && estado.turnoAtual.kmFinal > estado.turnoAtual.kmInicial) {
     estado.turnos.push({...estado.turnoAtual});
     estado.turnoAtual = null; // Limpa para novo turno
     salvar();
     alert('Turno arquivado! Recarregando app...');
     window.location.reload(); // Recarrega para limpar interface
+  } else {
+    alert('Por favor, finalize o turno corretamente antes de arquivar.');
   }
 }
 
@@ -271,7 +271,6 @@ function limparTodoHistorico() {
     alert("Histórico apagado.");
   }
 }
-
 
 // Registro do Service Worker para PWA
 if ('serviceWorker' in navigator) {
