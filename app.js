@@ -161,13 +161,36 @@ function salvarTurnoNoHistorico() {
 function carregarHistoricoGeral() {
   const lista = document.getElementById('listaHistorico');
   lista.innerHTML = '';
-  estado.turnos.forEach((t, i) => {
-    const li = document.createElement('li');
-    li.style.borderBottom = "1px solid #ccc";
-    li.style.padding = "10px 0";
-    const lucro = t.apurado - (t.custos.abastecimento + t.custos.outros);
-    li.innerHTML = `<strong>Data: ${t.data}</strong><br>Lucro: R$ ${lucro.toFixed(2)} | KM: ${t.kmFinal - t.kmInicial}`;
-    lista.appendChild(li);
+
+  // Inverte a ordem para mostrar o mais recente no topo
+  const turnosOrdenados = [...estado.turnos].reverse();
+
+  turnosOrdenados.forEach((t, i) => {
+    // Calcula as métricas detalhadas
+    const horas = diffHoras(t.horaInicio, t.horaFim);
+    const custosTotais = t.custos.abastecimento + t.custos.outros;
+    const lucro = t.apurado - custosTotais;
+    const valorHora = horas > 0 ? lucro / horas : 0;
+    const kmRodados = t.kmFinal - t.kmInicial;
+
+    // Formata a data para exibição (assumindo que 't.data' é ISO string)
+    const dataFormatada = new Date(t.data[0]).toLocaleDateString('pt-BR');
+
+    const divTurno = document.createElement('li');
+    divTurno.className = 'detalhe-turno';
+    divTurno.innerHTML = `
+      <div style="padding: 15px; border: 1px solid #ccc; margin-bottom: 10px; border-radius: 5px; background: #fafafa;">
+        <strong>Data: ${dataFormatada} | Turno ${turnosOrdenados.length - i}</strong><br>
+        ${t.horaInicio} às ${t.horaFim} (${horas.toFixed(2)}h)<br>
+        KM Rodados: ${kmRodados} km<br>
+        Total Abastecimento: R$ ${t.custos.abastecimento.toFixed(2)}<br>
+        Outros Custos: R$ ${t.custos.outros.toFixed(2)}<br>
+        Valor Apurado: R$ ${t.apurado.toFixed(2)}<br>
+        Lucro: <strong style="color:green;">R$ ${lucro.toFixed(2)}</strong><br>
+        Valor da Hora: R$ ${valorHora.toFixed(2)}
+      </div>
+    `;
+    lista.appendChild(divTurno);
   });
 }
 
@@ -198,3 +221,4 @@ function limparTodoHistorico() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(e => console.log(e));
 }
+
