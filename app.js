@@ -11,16 +11,30 @@ function salvar() {
 }
 
 /******************************
- * TRATAMENTO DE HORA (Ajuste solicitado)
+ * UTILITÁRIOS DE HORA
  ******************************/
+
+// Converte minutos totais para formato HH:MM (ex: 80 -> 01:20h)
+function formatarMinutosParaHHMM(minutosTotais) {
+  const horas = Math.floor(minutosTotais / 60);
+  const minutos = Math.round(minutosTotais % 60); 
+  return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}h`;
+}
+
+// Retorna a diferença em MINUTOS totais
+function diffHoras(h1, h2) {
+  const [aH, aM] = h1.split(':').map(Number);
+  const [bH, bM] = h2.split(':').map(Number);
+  let inicio = aH * 60 + aM;
+  let fim = bH * 60 + bM;
+  if (fim < inicio) fim += 24 * 60; // Virada de dia
+  return fim - inicio; 
+}
+
+// Trata entrada de hora flexível (0620, 6:20, 06 20) para 06:20
 function tratarEntradaHora(valor) {
-  // Remove tudo que não é número
   let num = valor.replace(/\D/g, '');
-  
-  // Se digitou 3 números (ex: 620), vira 0620
   if (num.length === 3) num = '0' + num;
-  
-  // Se tem 4 números, formata HH:MM
   if (num.length === 4) {
     const hh = num.substring(0, 2);
     const mm = num.substring(2, 4);
@@ -28,35 +42,43 @@ function tratarEntradaHora(valor) {
       return `${hh}:${mm}`;
     }
   }
-  return valor; // Retorna original se não conseguir formatar
+  return valor; 
 }
 
 function validarHora(hora) {
-  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(hora);
+  return /^(\d|2[0-3]):([0-5]\d)$/.test(hora);
 }
-
-function diffHoras(h1, h2) {
-  const [aH, aM] = h1.split(':').map(Number);
-  const [bH, bM] = h2.split(':').map(Number);
-  let inicio = aH * 60 + aM;
-  let fim = bH * 60 + bM;
-  if (fim < inicio) fim += 24 * 60; // Virada de dia
-  // Retorna o total de minutos
-  return fim - inicio; 
-}
-
-// Converte horas decimais (ex: 8.67) para HH:MM (ex: 8:40)
-function formatarMinutosParaHHMM(horasDecimais) {
-  const horas = Math.floor(horasDecimais);
-  const minutosDecimais = (horasDecimais - horas) * 60;
-  // Arredonda os minutos para o inteiro mais próximo
-  const minutos = Math.round(minutosDecimais); 
-  return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}h`;
-}
-
 
 /******************************
- * FUNÇÕES DE AÇÃO
+ * FUNÇÕES DE AÇÃO E NAVEGAÇÃO
+ ******************************/
+
+function irPara(id) {
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+  const telaDestino = document.getElementById(id);
+  
+  if (telaDestino) {
+    telaDestino.classList.add('ativa');
+  } else {
+    console.error(`Tela com id "${id}" não encontrada.`);
+    return;
+  }
+
+  // Gatilhos de carregamento de dados conforme a tela
+  if (id === 'resumoTurno') carregarResumoTurno();
+  if (id === 'resumoDia') carregarResumoDia();
+  if (id === 'historicoGeral') carregarHistoricoGeral();
+}
+
+function capturarHora(id) {
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  document.getElementById(id).value = `${h}:${m}`;
+}
+
+/******************************
+ * FLUXO DO APLICATIVO
  ******************************/
 
 function confirmarInicioTurno() {
@@ -72,7 +94,7 @@ function confirmarInicioTurno() {
   }
 
   estado.turnoAtual = {
-    data: new Date().toISOString().split('T')[0],
+    data: new Date().toISOString().split('T')[0], // Apenas a data YYYY-MM-DD
     horaInicio: hora,
     kmInicial: km,
     horaFim: '',
@@ -89,7 +111,7 @@ function confirmarInicioTurno() {
 function adicionarAbastecimento() {
   const input = document.getElementById('valorAbastecimento');
   const valor = Number(input.value);
-  if (valor > 0) {
+  if (valor > 0 && estado.turnoAtual) {
     estado.turnoAtual.custos.abastecimento += valor;
     document.getElementById('totalAbastecido').value = estado.turnoAtual.custos.abastecimento.toFixed(2);
     input.value = '';
@@ -101,7 +123,7 @@ function adicionarAbastecimento() {
 function adicionarOutrosCustos() {
   const input = document.getElementById('valorOutrosCustos');
   const valor = Number(input.value);
-  if (valor > 0) {
+  if (valor > 0 && estado.turnoAtual) {
     estado.turnoAtual.custos.outros += valor;
     document.getElementById('totalOutrosCustos').value = estado.turnoAtual.custos.outros.toFixed(2);
     input.value = '';
@@ -111,17 +133,19 @@ function adicionarOutrosCustos() {
 }
 
 function atualizarTotalCustos() {
-  const total = estado.turnoAtual.custos.abastecimento + estado.turnoAtual.custos.outros;
-  document.getElementById('totalCustos').value = total.toFixed(2);
+  if (estado.turnoAtual) {
+    const total = estado.turnoAtual.custos.abastecimento + estado.turnoAtual.custos.outros;
+    document.getElementById('totalCustos').value = total.toFixed(2);
+  }
 }
 
 function inserirApurado() {
   const valor = Number(document.getElementById('apurado').value);
-  if (estado.turnoAtual) {
+  if (estado.turnoAtual && !isNaN(valor) && valor >= 0) {
     estado.turnoAtual.apurado = valor;
     salvar();
-    alert('Dados salvos!');
-    irPara('menu'); // Esta linha foi adicionada
+    alert('Ganhos salvos! Voltando ao menu.');
+    irPara('menu');
   }
 }
 
@@ -132,7 +156,7 @@ function confirmarFimTurno() {
   const hora = inputHora.value;
   const km = Number(document.getElementById('kmFinal').value);
 
-  if (!validarHora(hora) || km <= estado.turnoAtual.kmInicial) {
+  if (!estado.turnoAtual || !validarHora(hora) || km <= estado.turnoAtual.kmInicial) {
     alert('Verifique a Hora e o KM Final (deve ser maior que o inicial)!');
     return;
   }
@@ -143,51 +167,83 @@ function confirmarFimTurno() {
   irPara('resumoTurno');
 }
 
+function salvarTurnoNoHistorico() {
+  if (estado.turnoAtual && estado.turnoAtual.horaFim) {
+    estado.turnos.push({...estado.turnoAtual});
+    estado.turnoAtual = null; // Limpa para novo turno
+    salvar();
+    alert('Turno arquivado! Recarregando app...');
+    window.location.reload(); // Recarrega para limpar interface
+  }
+}
+
+/******************************
+ * RESUMOS E HISTÓRICO
+ ******************************/
+
 function carregarResumoTurno() {
   const t = estado.turnoAtual;
   if (!t || !t.horaFim) return;
 
-  const totalMinutos = diffHoras(t.horaInicio, t.horaFim); // Agora retorna minutos
-  const horasFormatadas = formatarMinutosParaHHMM(totalMinutos / 60); // Converte para HH:MMh
+  const totalMinutos = diffHoras(t.horaInicio, t.horaFim);
+  const horasFormatadas = formatarMinutosParaHHMM(totalMinutos);
   const km = t.kmFinal - t.kmInicial;
   const custos = t.custos.abastecimento + t.custos.outros;
   const lucro = t.apurado - custos;
   const vHora = (totalMinutos / 60) > 0 ? lucro / (totalMinutos / 60) : 0;
 
   document.getElementById('resumoHoras').innerText = horasFormatadas;
-  // ... restante do código (KM, Custos, Lucro, etc.)
-  document.getElementById('resumoValorHora').innerText = "R$ " + vHora.toFixed(2) + "/h";
+  document.getElementById('resumoKM').innerText = `${km} km`;
+  document.getElementById('resumoCustos').innerText = `R$ ${custos.toFixed(2)}`;
+  document.getElementById('resumoLucro').innerText = `R$ ${lucro.toFixed(2)}`;
+  document.getElementById('resumoValorHora').innerText = `R$ ${vHora.toFixed(2)}/h`;
 }
 
+function carregarResumoDia() {
+  const hoje = new Date().toISOString().split('T')[0];
+  const turnosDia = estado.turnos.filter(t => t.data === hoje);
 
-function salvarTurnoNoHistorico() {
-  if (estado.turnoAtual && estado.turnoAtual.horaFim) {
-    estado.turnos.push({...estado.turnoAtual});
-    estado.turnoAtual = null;
-    salvar();
-    alert('Turno arquivado!');
-    window.location.reload(); 
-  }
+  let lucroTotal = 0;
+  let kmTotal = 0;
+  let minutosTotal = 0;
+  let abastecimentoTotal = 0;
+  let outrosTotal = 0;
+  let apuradoTotal = 0;
+
+  turnosDia.forEach(t => {
+    minutosTotal += diffHoras(t.horaInicio, t.horaFim);
+    kmTotal += (t.kmFinal - t.kmInicial);
+    abastecimentoTotal += t.custos.abastecimento;
+    outrosTotal += t.custos.outros;
+    apuradoTotal += t.apurado;
+    lucroTotal += (t.apurado - (t.custos.abastecimento + t.custos.outros));
+  });
+
+  const horasFormatadas = formatarMinutosParaHHMM(minutosTotal);
+  const valorHoraMedia = (minutosTotal / 60) > 0 ? lucroTotal / (minutosTotal / 60) : 0;
+
+  document.getElementById('diaHorasTrabalhadas').innerText = horasFormatadas;
+  document.getElementById('diaKM').innerText = `${kmTotal} km`;
+  document.getElementById('diaAbastecido').innerText = `R$ ${abastecimentoTotal.toFixed(2)}`;
+  document.getElementById('diaOutrosCustos').innerText = `R$ ${outrosTotal.toFixed(2)}`;
+  document.getElementById('diaApurado').innerText = `R$ ${apuradoTotal.toFixed(2)}`;
+  document.getElementById('diaLucro').innerText = `R$ ${lucroTotal.toFixed(2)}`;
+  document.getElementById('diaValorHora').innerText = `R$ ${valorHoraMedia.toFixed(2)}/h`;
 }
 
 function carregarHistoricoGeral() {
   const lista = document.getElementById('listaHistorico');
   lista.innerHTML = '';
-
   const turnosOrdenados = [...estado.turnos].reverse();
 
   turnosOrdenados.forEach((t, i) => {
-    // Calcula as métricas
-    // A função diffHoras agora retorna minutos totais
-    const totalMinutos = diffHoras(t.horaInicio, t.horaFim); 
-    const horasFormatadas = formatarMinutosParaHHMM(totalMinutos / 60);
+    const totalMinutos = diffHoras(t.horaInicio, t.horaFim);
+    const horasFormatadas = formatarMinutosParaHHMM(totalMinutos);
     const custosTotais = t.custos.abastecimento + t.custos.outros;
     const lucro = t.apurado - custosTotais;
     const valorHora = (totalMinutos / 60) > 0 ? lucro / (totalMinutos / 60) : 0;
     const kmRodados = t.kmFinal - t.kmInicial;
-
-    // Ajuste aqui para formatar a data corretamente
-    const dataFormatada = new Date(t.data[0]).toLocaleDateString('pt-BR');
+    const dataFormatada = new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR');
 
     const divTurno = document.createElement('li');
     divTurno.className = 'detalhe-turno';
@@ -207,77 +263,21 @@ function carregarHistoricoGeral() {
   });
 }
 
-function carregarResumoDia() {
-  const hoje = new Date().toISOString().split('T')[0];
-  const turnosDia = estado.turnos.filter(t => t.data[0] === hoje); // Acessa o índice 0 da data ISO
-
-  let lucroTotal = 0;
-  let kmTotal = 0;
-  let minutosTotal = 0;
-  let abastecimentoTotal = 0;
-  let outrosTotal = 0;
-  let apuradoTotal = 0;
-
-  turnosDia.forEach(t => {
-    minutosTotal += diffHoras(t.horaInicio, t.horaFim);
-    kmTotal += (t.kmFinal - t.kmInicial);
-    abastecimentoTotal += t.custos.abastecimento;
-    outrosTotal += t.custos.outros;
-    apuradoTotal += t.apurado;
-    lucroTotal += (t.apurado - (t.custos.abastecimento + t.custos.outros));
-  });
-
-  const horasFormatadas = formatarMinutosParaHHMM(minutosTotal / 60);
-  const valorHoraMedia = (minutosTotal / 60) > 0 ? lucroTotal / (minutosTotal / 60) : 0;
-
-  // Atualiza os elementos na tela Resumo do Dia
-  document.getElementById('diaHorasTrabalhadas').innerText = horasFormatadas;
-  document.getElementById('diaKM').innerText = `${kmTotal} km`;
-  document.getElementById('diaAbastecido').innerText = `R$ ${abastecimentoTotal.toFixed(2)}`;
-  document.getElementById('diaOutrosCustos').innerText = `R$ ${outrosTotal.toFixed(2)}`;
-  document.getElementById('diaApurado').innerText = `R$ ${apuradoTotal.toFixed(2)}`;
-  document.getElementById('diaLucro').innerText = `R$ ${lucroTotal.toFixed(2)}`;
-  document.getElementById('diaValorHora').innerText = `R$ ${valorHoraMedia.toFixed(2)}`;
-}
-
 function limparTodoHistorico() {
-  if(confirm("Deseja apagar TUDO?")) {
+  if(confirm("Deseja apagar TODO o histórico de turnos?")) {
     estado.turnos = [];
     salvar();
     carregarHistoricoGeral();
+    alert("Histórico apagado.");
   }
 }
 
-function irPara(id) {
-  // 1. Esconde todas as telas e mostra a selecionada
-  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
-  const telaDestino = document.getElementById(id);
-  
-  if (telaDestino) {
-    telaDestino.classList.add('ativa');
-  } else {
-    console.error(`Tela com id "${id}" não encontrada.`);
-    return;
-  }
 
-  // 2. Gatilhos de carregamento de dados conforme a tela
-  if (id === 'resumoTurno') {
-    carregarResumoTurno();
-  } 
-  else if (id === 'resumoDia') {
-    carregarResumoDia();
-  } 
-  else if (id === 'historicoGeral') {
-    carregarHistoricoGeral();
-  }
-}
-
-// Registro do SW para 2026
+// Registro do Service Worker para PWA
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(e => console.log(e));
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registrado!'))
+      .catch(err => console.error('Erro SW:', err));
+  });
 }
-
-
-
-
-
