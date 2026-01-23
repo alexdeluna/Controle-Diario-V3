@@ -218,9 +218,34 @@ function limparTodoHistorico() {
   }
 }
 
+function irPara(id) {
+  // 1. Esconde todas as telas e mostra a selecionada
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+  const telaDestino = document.getElementById(id);
+  
+  if (telaDestino) {
+    telaDestino.classList.add('ativa');
+  } else {
+    console.error(`Tela com id "${id}" não encontrada.`);
+    return;
+  }
+
+  // 2. Gatilhos de carregamento de dados conforme a tela
+  if (id === 'resumoTurno') {
+    carregarResumoTurno();
+  } 
+  else if (id === 'resumoDia') {
+    carregarResumoDia();
+  } 
+  else if (id === 'historicoGeral') {
+    carregarHistoricoGeral();
+  }
+}
+
 // Registro do SW para 2026
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(e => console.log(e));
 }
+
 
 
