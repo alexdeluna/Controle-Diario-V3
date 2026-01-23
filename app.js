@@ -41,8 +41,19 @@ function diffHoras(h1, h2) {
   let inicio = aH * 60 + aM;
   let fim = bH * 60 + bM;
   if (fim < inicio) fim += 24 * 60; // Virada de dia
-  return (fim - inicio) / 60;
+  // Retorna o total de minutos
+  return fim - inicio; 
 }
+
+// Converte horas decimais (ex: 8.67) para HH:MM (ex: 8:40)
+function formatarMinutosParaHHMM(horasDecimais) {
+  const horas = Math.floor(horasDecimais);
+  const minutosDecimais = (horasDecimais - horas) * 60;
+  // Arredonda os minutos para o inteiro mais próximo
+  const minutos = Math.round(minutosDecimais); 
+  return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}h`;
+}
+
 
 /******************************
  * FUNÇÕES DE AÇÃO
@@ -136,18 +147,18 @@ function carregarResumoTurno() {
   const t = estado.turnoAtual;
   if (!t || !t.horaFim) return;
 
-  const horas = diffHoras(t.horaInicio, t.horaFim);
+  const totalMinutos = diffHoras(t.horaInicio, t.horaFim); // Agora retorna minutos
+  const horasFormatadas = formatarMinutosParaHHMM(totalMinutos / 60); // Converte para HH:MMh
   const km = t.kmFinal - t.kmInicial;
   const custos = t.custos.abastecimento + t.custos.outros;
   const lucro = t.apurado - custos;
-  const vHora = horas > 0 ? lucro / horas : 0;
+  const vHora = (totalMinutos / 60) > 0 ? lucro / (totalMinutos / 60) : 0;
 
-  document.getElementById('resumoHoras').innerText = horas.toFixed(2) + "h";
-  document.getElementById('resumoKM').innerText = km + " km";
-  document.getElementById('resumoCustos').innerText = "R$ " + custos.toFixed(2);
-  document.getElementById('resumoLucro').innerText = "R$ " + lucro.toFixed(2);
+  document.getElementById('resumoHoras').innerText = horasFormatadas;
+  // ... restante do código (KM, Custos, Lucro, etc.)
   document.getElementById('resumoValorHora').innerText = "R$ " + vHora.toFixed(2) + "/h";
 }
+
 
 function salvarTurnoNoHistorico() {
   if (estado.turnoAtual && estado.turnoAtual.horaFim) {
@@ -197,17 +208,35 @@ function carregarHistoricoGeral() {
 
 function carregarResumoDia() {
   const hoje = new Date().toISOString().split('T')[0];
-  const turnosDia = estado.turnos.filter(t => t.data === hoje);
+  const turnosDia = estado.turnos.filter(t => t.data[0] === hoje); // Acessa o índice 0 da data ISO
+
   let lucroTotal = 0;
   let kmTotal = 0;
+  let minutosTotal = 0;
+  let abastecimentoTotal = 0;
+  let outrosTotal = 0;
+  let apuradoTotal = 0;
 
   turnosDia.forEach(t => {
-    lucroTotal += (t.apurado - (t.custos.abastecimento + t.custos.outros));
+    minutosTotal += diffHoras(t.horaInicio, t.horaFim);
     kmTotal += (t.kmFinal - t.kmInicial);
+    abastecimentoTotal += t.custos.abastecimento;
+    outrosTotal += t.custos.outros;
+    apuradoTotal += t.apurado;
+    lucroTotal += (t.apurado - (t.custos.abastecimento + t.custos.outros));
   });
 
-  document.getElementById('diaLucro').innerText = "R$ " + lucroTotal.toFixed(2);
-  document.getElementById('diaKM').innerText = kmTotal + " km";
+  const horasFormatadas = formatarMinutosParaHHMM(minutosTotal / 60);
+  const valorHoraMedia = (minutosTotal / 60) > 0 ? lucroTotal / (minutosTotal / 60) : 0;
+
+  // Atualiza os elementos na tela Resumo do Dia
+  document.getElementById('diaHorasTrabalhadas').innerText = horasFormatadas;
+  document.getElementById('diaKM').innerText = `${kmTotal} km`;
+  document.getElementById('diaAbastecido').innerText = `R$ ${abastecimentoTotal.toFixed(2)}`;
+  document.getElementById('diaOutrosCustos').innerText = `R$ ${outrosTotal.toFixed(2)}`;
+  document.getElementById('diaApurado').innerText = `R$ ${apuradoTotal.toFixed(2)}`;
+  document.getElementById('diaLucro').innerText = `R$ ${lucroTotal.toFixed(2)}`;
+  document.getElementById('diaValorHora').innerText = `R$ ${valorHoraMedia.toFixed(2)}`;
 }
 
 function limparTodoHistorico() {
@@ -246,6 +275,7 @@ function irPara(id) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(e => console.log(e));
 }
+
 
 
 
