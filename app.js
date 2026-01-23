@@ -280,3 +280,7 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.error('Erro SW:', err));
   });
 }
+
+
+
+
