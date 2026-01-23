@@ -174,18 +174,19 @@ function carregarHistoricoGeral() {
   const lista = document.getElementById('listaHistorico');
   lista.innerHTML = '';
 
-  // Inverte a ordem para mostrar o mais recente no topo
   const turnosOrdenados = [...estado.turnos].reverse();
 
   turnosOrdenados.forEach((t, i) => {
-    // Calcula as métricas detalhadas
-    const horas = diffHoras(t.horaInicio, t.horaFim);
+    // Calcula as métricas
+    // A função diffHoras agora retorna minutos totais
+    const totalMinutos = diffHoras(t.horaInicio, t.horaFim); 
+    const horasFormatadas = formatarMinutosParaHHMM(totalMinutos / 60);
     const custosTotais = t.custos.abastecimento + t.custos.outros;
     const lucro = t.apurado - custosTotais;
-    const valorHora = horas > 0 ? lucro / horas : 0;
+    const valorHora = (totalMinutos / 60) > 0 ? lucro / (totalMinutos / 60) : 0;
     const kmRodados = t.kmFinal - t.kmInicial;
 
-    // Formata a data para exibição (assumindo que 't.data' é ISO string)
+    // Ajuste aqui para formatar a data corretamente
     const dataFormatada = new Date(t.data[0]).toLocaleDateString('pt-BR');
 
     const divTurno = document.createElement('li');
@@ -193,7 +194,7 @@ function carregarHistoricoGeral() {
     divTurno.innerHTML = `
       <div style="padding: 15px; border: 1px solid #ccc; margin-bottom: 10px; border-radius: 5px; background: #fafafa;">
         <strong>Data: ${dataFormatada} | Turno ${turnosOrdenados.length - i}</strong><br>
-        ${t.horaInicio} às ${t.horaFim} (${horas.toFixed(2)}h)<br>
+        ${t.horaInicio} às ${t.horaFim} (${horasFormatadas})<br>
         KM Rodados: ${kmRodados} km<br>
         Total Abastecimento: R$ ${t.custos.abastecimento.toFixed(2)}<br>
         Outros Custos: R$ ${t.custos.outros.toFixed(2)}<br>
@@ -275,6 +276,7 @@ function irPara(id) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(e => console.log(e));
 }
+
 
 
 
